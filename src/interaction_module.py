@@ -3,7 +3,7 @@ import os
 import openai
 from text_to_speech import text_to_speech
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def handle_student_interaction(original_text, user_explanation, is_hint=True):
     """

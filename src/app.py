@@ -11,7 +11,7 @@ import pytesseract
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# openai.api_key = os.getenv("OPENAI_API_KEY")
 
 UPLOAD_FOLDER = 'uploads/'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER

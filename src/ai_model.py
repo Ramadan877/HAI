@@ -3,7 +3,7 @@ import openai
 import os
 from interaction_module import generate_response
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def generate_feedback(original_text, explanation_text, is_hint=True):
     feedback_prompt = (
