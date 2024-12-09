@@ -1,0 +1,8 @@
+Flask==2.3.3
+scipy>=1.11.3
+numpy==1.22.0
+TTS==0.22.0
+openai-whisper==20231117
+spacy[ja]>=3.7.0
+torch>=2.1.2
+numba>=0.59.0

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Feedback System</title>
+    <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f7fc;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.container {
+    max-width: 700px;
+    width: 100%;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    border-radius: 8px;
+}
+
+.form-container {
+    margin-top: 20px;
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+input[type="text"], textarea {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: #f9f9f9;
+}
+
+textarea {
+    resize: vertical;
+}
+
+.record-btn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.record-btn:hover {
+    background-color: #45a049;
+}
+
+#recording-status {
+    margin-left: 10px;
+    font-size: 14px;
+    color: #f39c12;
+}
+
+.submit-btn {
+    width: 100%;
+    background-color: #3498db;
+    color: white;
+    padding: 15px;
+    border: none;
+    border-radius: 6px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.submit-btn:hover {
+    background-color: #2980b9;
+}
+
+.feedback {
+    margin-top: 40px;
+    padding: 20px;
+    background-color: #ecf0f1;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#feedback-text {
+    font-size: 16px;
+    color: #555;
+}
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Student Feedback System</h1>
+        <p>Enter the text and record your explanation. Then submit to get feedback!</p>
+
+        <div class="form-container">
+            <form id="feedback-form" method="POST" action="/submit_explanation" enctype="multipart/form-data">
+                <div class="input-group">
+                    <label for="text-input">Enter your Text:</label>
+                    <textarea id="text-input" name="text" placeholder="Enter your question or text here..." rows="5" required></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label for="audio-input">Record Your Explanation:</label>
+                    <button type="button" id="record-btn" class="record-btn">Start Recording</button>
+                    <input type="file" id="audio-input" name="audio" accept="audio/*" hidden required>
+                    <span id="recording-status">Not Recording</span>
+                </div>
+
+                <button type="submit" id="submit-btn" class="submit-btn">Submit</button>
+            </form>
+
+            <div id="feedback" class="feedback">
+                <h2>Feedback</h2>
+                <p id="feedback-text">Once you submit your explanation, feedback will appear here.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+    const recordBtn = document.getElementById('record-btn');
+    const audioInput = document.getElementById('audio-input');
+    const recordingStatus = document.getElementById('recording-status');
+    const feedbackText = document.getElementById('feedback-text');
+    let mediaRecorder;
+    let audioChunks = [];
+
+    recordBtn.addEventListener('click', async () => {
+        if (recordingStatus.textContent === 'Not Recording') {
+            recordingStatus.textContent = 'Recording...';
+            audioChunks = [];
+
+            // Request audio recording permission
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    const audioFile = new File([audioBlob], 'explanation_audio.wav', { type: 'audio/wav' });
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(audioFile);
+                    audioInput.files = dataTransfer.files;
+                    recordingStatus.textContent = 'Recording Stopped';
+                };
+
+                mediaRecorder.start();
+            } catch (err) {
+                recordingStatus.textContent = 'Error: Could not access microphone';
+                console.error('Error accessing microphone: ', err);
+            }
+        } else {
+            mediaRecorder.stop();
+        }
+    });
+
+    // Handling form submission
+    const form = document.getElementById('feedback-form');
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+        const response = await fetch('/submit_explanation', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.feedback) {
+            feedbackText.textContent = data.feedback;
+        }
+        if (data.hint) {
+            feedbackText.textContent += '\nHint: ' + data.hint;
+        }
+    });
+});
+
+    </script>
+</body>
+</html>
+
+
+
+
+ 
+
+
